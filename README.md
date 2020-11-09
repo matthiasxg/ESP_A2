@@ -200,6 +200,7 @@ Damit die `generatePlayfairSquare` korrekt funktioniert, müssen folgende drei F
 * `void toUpper(char *text)`: Konvertiert alle Buchstaben des Strings `text` zu Großbuchstaben.
 * `void replaceLetters(char *text, char original, char new_char)`: Ersetzt alle Vorkommen des Zeichens `original` im String `text` mit dem Zeichen `new_char`.
 
+*Anmerkung:* Strings, die länger als SIZE_BUFFER sind, werden vom TestSystem NICHT getestet. 
 
 ## Spezifikation
 
