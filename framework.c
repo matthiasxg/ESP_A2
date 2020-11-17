@@ -42,6 +42,12 @@ int checkStringValidity(char *text, int max_length, OperationType op)
   int string_length = stringLength(text);
   if(text[string_length - 1] == '\n')
     text[string_length-- - 1] = '\0';
+  else
+  {
+    int character;
+    while((character = getchar()) != '\n' && character != EOF);
+    return 0;
+  }
 
   int number_of_letters = containsOnlyAlpha(text);
 
