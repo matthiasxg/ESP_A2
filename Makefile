@@ -1,6 +1,6 @@
 CC            := clang
 CCFLAGS       := -Wall -Wextra -Werror -pedantic -std=c17
-ASSIGNMENT    := a2
+ASSIGNMENT    := ass2
 .DEFAULT_GOAL := help
 
 .PHONY: clean bin run test help
@@ -20,10 +20,20 @@ run: all              ## runs the project with default config
 	@echo "[\033[36mINFO\033[0m] Executing binary..."
 	./$(ASSIGNMENT)
 
-test: all             ## runs public testcases on the project
+test: all             ## runs public testcases on the project compares output line by line
 	@echo "[\033[36mINFO\033[0m] Executing testrunner..."
 	./testrunner -c test.toml
+	
+testbychar: all             ## runs public testcases on the project compares output char by char
+	@echo "[\033[36mINFO\033[0m] Executing testrunner..."
+	./testrunner -c test.toml -m char
 
+testbyword: all             ## runs public testcases on the project compares output word by word
+	@echo "[\033[36mINFO\033[0m] Executing testrunner..."
+	./testrunner -c test.toml -m word
+testprint: all             ## runs public testcases on the project compares output line by line, prints to terminal
+	@echo "[\033[36mINFO\033[0m] Executing testrunner..."
+	./testrunner -c test.toml -v
 help:                 ## prints the help text
 	@echo "Usage: make \033[36m<TARGET>\033[0m"
 	@echo "Available targets:"
