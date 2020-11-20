@@ -1,6 +1,6 @@
 CC            := clang
 CCFLAGS       := -Wall -Wextra -Werror -pedantic -std=c17
-ASSIGNMENT    := ass2
+ASSIGNMENT    := a2
 .DEFAULT_GOAL := help
 
 .PHONY: clean bin run test help
