@@ -28,6 +28,7 @@
 // forward declarations
 int getOption();
 void encryptMessage(char *square);
+int fillBigram(char *plaintext, char *bigrams);
 void decryptMessage(char *square);
 
 //-----------------------------------------------------------------------------
@@ -50,7 +51,7 @@ int main()
     case ENCRYPT:
       encryptMessage(*square);
       break;
-    
+
     case DECRYPT:
       decryptMessage(*square);
       break;
@@ -67,14 +68,56 @@ int main()
 void encryptMessage(char *square)
 {
   char plaintext[MAX_PLAINTEXT_LENGTH];
+  char bigrams[MAX_PLAINTEXT_LENGTH];
+  //char encrypted[MAX_PLAINTEXT_LENGTH];
+  int bigrams_Size = 0;
   do
   {
+    
     printf("%s", PLAINTEXT_MESSAGE);
     fgets(plaintext, MAX_PLAINTEXT_LENGTH, stdin);
-  } while (!checkStringValidity(plaintext, MAX_PLAINTEXT_LENGTH, IS_ENCRYPTING));
+    cleanString(plaintext, IS_ENCRYPTING);
+    bigrams_Size = fillBigram(plaintext, bigrams);
+  } while (!checkStringValidity(plaintext, MAX_PLAINTEXT_LENGTH, IS_ENCRYPTING) &&
+           bigrams_Size * 2 <= MAX_PLAINTEXT_LENGTH);
 
-  printf("%s\n\n", plaintext);
-  printf("%s", square);
+  printf("%s\n", bigrams);
+
+  printf("\n\n%s", square);
+}
+
+//-----------------------------------------------------------------------------
+// TODO
+//
+//
+int fillBigram(char *plaintext, char *bigrams)
+{
+  char *character;
+  int bigrams_Size = 0;
+  for (character = plaintext; *character != '\n'; character++)
+  {
+    if ((bigrams_Size % 2 == 1) && *(bigrams - 1) == *character)
+    {
+      *bigrams = 'X';
+      bigrams++;
+      *bigrams = *character;
+      bigrams++;
+      bigrams_Size += 2;
+    }
+    else
+    {
+      *bigrams = *character;
+      bigrams++;
+      bigrams_Size++;
+    }
+  }
+  if (bigrams_Size % 2 == 1)
+  {
+    *bigrams = 'X';
+    bigrams_Size++;
+  }
+
+  return bigrams_Size;
 }
 
 //-----------------------------------------------------------------------------
@@ -89,7 +132,7 @@ void decryptMessage(char *square)
     printf("%s", CIPHERTEXT_MESSAGE);
     fgets(ciphertext, MAX_CIPHERTEXT_LENGTH, stdin);
   } while (!checkStringValidity(ciphertext, MAX_PLAINTEXT_LENGTH, IS_DECRYPTING));
-  
+
   printf("%s", square);
 }
 
