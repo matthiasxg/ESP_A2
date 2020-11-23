@@ -15,9 +15,7 @@
 #define ASCII_GAP -32 // a -> A
 
 // forward declarations
-int stringLength(char *text);
-void toUpper(char *text);
-void replaceLetters(char *text, char original, char new_char);
+
 
 //-----------------------------------------------------------------------------
 ///
@@ -62,7 +60,7 @@ void toUpper(char *text)
   char *index;
   for (index = text; *index != '\0'; index++)
   {
-    if ('a' <= *index || *index <= 'z')
+    if ('a' <= *index && *index <= 'z')
     {
       *index = *index + ASCII_GAP;
     }
