@@ -418,7 +418,7 @@ void fillDecrypted(char *decrypted, char *ciphertext, char *square)
 
   for (ciphertext_index = ciphertext; *ciphertext_index != '\0'; ciphertext_index += 2)
   {
-    getIndices(decrypted_index, square, indices);
+    getIndices(ciphertext_index, square, indices);
 
     if (*indices == *(indices + 2)) //same row
     {
@@ -432,9 +432,11 @@ void fillDecrypted(char *decrypted, char *ciphertext, char *square)
     {
       decryptBigram(decrypted_index, indices, square, DIFFERENT);
     }
+
     decrypted_index += 2;
   }
 }
+
 
 ///-----------------------------------------------------------------------------
 /// Asks the user what he wand to do. Either to encrypt a message, decrypt
