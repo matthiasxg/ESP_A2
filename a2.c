@@ -57,7 +57,7 @@ void fillDecrypted(char *decrypted, char *ciphertext, char *square);
 //
 int main()
 {
-  char square[SQUARE_SIDE * SQUARE_SIDE];
+  char square[SQUARE_SIDE * SQUARE_SIDE] = {'\0'};
   generatePlayfairSquare(square);
 
   int option;
@@ -84,9 +84,9 @@ int main()
 //
 void encryptMessage(char *square)
 {
-  char plaintext[MAX_PLAINTEXT_LENGTH];
-  char bigrams[MAX_PLAINTEXT_LENGTH];
-  char encrypted[MAX_PLAINTEXT_LENGTH];
+  char plaintext[MAX_PLAINTEXT_LENGTH] = {'\0'};
+  char bigrams[MAX_PLAINTEXT_LENGTH] = {'\0'};
+  char encrypted[MAX_PLAINTEXT_LENGTH] = {'\0'};
 
   getBigrams(plaintext, bigrams);
 
@@ -110,9 +110,9 @@ void encryptMessage(char *square)
 //
 void fillEncrypted(char *encrypted, char *bigrams, char *square)
 {
-  char *bigram_Index;
+  char *bigram_Index = NULL;
   char *encrypted_Index = encrypted;
-  int indices[4];
+  int indices[4] = {0};
   for (bigram_Index = bigrams; *bigram_Index != '\0'; bigram_Index += 2)
   {
 
@@ -246,9 +246,10 @@ void decryptBigram(char *decrypted_Index, int *indices, char *square, encrypt_ty
 //
 void getIndices(char *index, char *square, int *indices)
 {
-  char *square_Index;
+  char *square_Index = square;
   int counter = 0;
-  for (square_Index = square; *square_Index != '\0'; square_Index++)
+
+  for (int i = 0; i < SQUARE_SIDE * SQUARE_SIDE; i++)
   {
     if (*square_Index == *index)
     {
@@ -260,6 +261,7 @@ void getIndices(char *index, char *square, int *indices)
       *(indices + 2) = counter / SQUARE_SIDE;
       *(indices + 3) = counter % SQUARE_SIDE;
     }
+    square_Index++;
     counter++;
   }
 }
@@ -273,7 +275,6 @@ void getBigrams(char *plaintext, char *bigrams)
   int bigrams_Size = 0;
   do
   {
-
     printf("%s", PLAINTEXT_MESSAGE);
     fgets(plaintext, MAX_PLAINTEXT_LENGTH, stdin);
     cleanString(plaintext, IS_ENCRYPTING);
@@ -337,7 +338,7 @@ void printArray(char *array)
 {
   for (char *index = array; *index != '\0'; index += 2)
   {
-    if(*(index + 2) != '\0')
+    if (*(index + 2) != '\0')
     {
       printf("%c%c ", *index, *(index + 1));
     }
