@@ -28,7 +28,9 @@
 // forward declarations
 int getOption();
 void encryptMessage(char *square);
+void getBigram(char *plaintext, char *bigrams);
 int fillBigram(char *plaintext, char *bigrams);
+void cleanBigram(char *bigrams);
 void decryptMessage(char *square);
 
 //-----------------------------------------------------------------------------
@@ -70,20 +72,31 @@ void encryptMessage(char *square)
   char plaintext[MAX_PLAINTEXT_LENGTH];
   char bigrams[MAX_PLAINTEXT_LENGTH];
   //char encrypted[MAX_PLAINTEXT_LENGTH];
-  int bigrams_Size = 0;
-  do
-  {
-    
-    printf("%s", PLAINTEXT_MESSAGE);
-    fgets(plaintext, MAX_PLAINTEXT_LENGTH, stdin);
-    cleanString(plaintext, IS_ENCRYPTING);
-    bigrams_Size = fillBigram(plaintext, bigrams);
-  } while (!checkStringValidity(plaintext, MAX_PLAINTEXT_LENGTH, IS_ENCRYPTING) &&
-           bigrams_Size * 2 <= MAX_PLAINTEXT_LENGTH);
+
+  getBigram(plaintext, bigrams);
 
   printf("%s\n", bigrams);
 
   printf("\n\n%s", square);
+  cleanBigram(bigrams);
+}
+//-----------------------------------------------------------------------------
+// TODO
+//
+//
+void getBigram(char *plaintext, char *bigrams)
+{
+  int bigrams_Size = 0;
+  do
+  {
+
+    printf("%s", PLAINTEXT_MESSAGE);
+    fgets(plaintext, MAX_PLAINTEXT_LENGTH, stdin);
+    cleanString(plaintext, IS_ENCRYPTING);
+    cleanBigram(bigrams);
+    bigrams_Size = fillBigram(plaintext, bigrams);
+  } while (!checkStringValidity(plaintext, MAX_PLAINTEXT_LENGTH, IS_ENCRYPTING) &&
+           bigrams_Size * 2 <= MAX_PLAINTEXT_LENGTH);
 }
 
 //-----------------------------------------------------------------------------
@@ -118,6 +131,18 @@ int fillBigram(char *plaintext, char *bigrams)
   }
 
   return bigrams_Size;
+}
+
+//-----------------------------------------------------------------------------
+// TODO
+//
+//
+void cleanBigram(char *bigrams)
+{
+  for (int i = 0; i < MAX_PLAINTEXT_LENGTH; i++)
+  {
+    *(bigrams + i) = '\0';
+  }
 }
 
 //-----------------------------------------------------------------------------
