@@ -16,14 +16,17 @@
 #define ASCII_GAP -32 // a -> A
 #define MAX_PLAINTEXT_LENGTH 50
 #define MAX_CIPHERTEXT_LENGTH 50
-#define ENCRYPT 1
-#define DECRYPT 2
-#define QUIT 0
 
 //strings
 #define OPTIONS "1 - Verschlüsseln\n2 - Entschlüsseln\n0 - Programm beenden\n"
 #define PLAINTEXT_MESSAGE "Klartext: "
 #define CIPHERTEXT_MESSAGE "Ciphertext: "
+
+//char
+#define ENCRYPT_CHAR '1'
+#define DECRYPT_CHAR '2'
+#define QUIT_CHAR '0'
+#define FORBIDDEN_CHAR_DECRYPTING 'W'
 
 //Enums
 typedef enum
@@ -39,7 +42,7 @@ void encryptMessage(char *square);
 void decryptMessage(char *square);
 void fillEncrypted(char *encrypted, char *bigrams, char *square);
 void fillDecrypted(char *decrypted, char *ciphertext, char *square);
-void getBigrams(char *plaintext, char *bigrams);
+void getBigrams(char *bigrams);
 void getCiphertext(char *ciphertext);
 int fillBigrams(char *plaintext, char *bigrams);
 void encryptBigram(char *encrypted_Index, int *indices, char *square, PlayfairRules type);
@@ -65,15 +68,15 @@ int main()
   generatePlayfairSquare(square);
 
   int option;
-  while ((option = getOption()) != QUIT)
+  while ((option = getOption()) != QUIT_CHAR)
   {
     switch (option)
     {
-    case ENCRYPT:
+    case ENCRYPT_CHAR:
       encryptMessage(square);
       break;
 
-    case DECRYPT:
+    case DECRYPT_CHAR:
       decryptMessage(square);
       break;
     }
@@ -91,11 +94,10 @@ int main()
 //
 void encryptMessage(char *square)
 {
-  char plaintext[MAX_PLAINTEXT_LENGTH] = {'\0'};
-  char bigrams[MAX_PLAINTEXT_LENGTH] = {'\0'};
-  char encrypted[MAX_PLAINTEXT_LENGTH] = {'\0'};
+  char bigrams[MAX_PLAINTEXT_LENGTH + 1] = {'\0'};
+  char encrypted[MAX_PLAINTEXT_LENGTH + 1] = {'\0'};
 
-  getBigrams(plaintext, bigrams);
+  getBigrams(bigrams);
 
   printf("Vorbereiteter Klartext: ");
   printArray(bigrams);
@@ -108,7 +110,6 @@ void encryptMessage(char *square)
   // cleaning the arrays for next time
   cleanArray(bigrams, MAX_PLAINTEXT_LENGTH);
   cleanArray(encrypted, MAX_PLAINTEXT_LENGTH);
-  cleanArray(plaintext, MAX_PLAINTEXT_LENGTH);
 }
 
 //------------------------------------------------------------------------------
@@ -120,8 +121,8 @@ void encryptMessage(char *square)
 //
 void decryptMessage(char *square)
 {
-  char ciphertext[MAX_CIPHERTEXT_LENGTH] = {'\0'} ;
-  char decrypted[MAX_CIPHERTEXT_LENGTH] = {'\0'};
+  char ciphertext[MAX_CIPHERTEXT_LENGTH + 1] = {'\0'};
+  char decrypted[MAX_CIPHERTEXT_LENGTH + 1] = {'\0'};
 
   getCiphertext(ciphertext);
 
@@ -156,7 +157,7 @@ void fillEncrypted(char *encrypted, char *bigrams, char *square)
   for (bigram_Index = bigrams; *bigram_Index != '\0'; bigram_Index += 2)
   {
     getIndices(bigram_Index, square, indices);
-    
+
     if (*indices == *(indices + 2)) //same row
     {
       encryptBigram(encrypted_Index, indices, square, SAME_ROW);
@@ -187,33 +188,39 @@ void encryptBigram(char *encrypted_Index, int *indices, char *square, PlayfairRu
   switch (rule)
   {
   case SAME_ROW: // bigram in the same row
-    if (*(indices + 1) == SQUARE_SIDE - 1) // if first letter is on the right
+    // if first letter is on the right
+    if (*(indices + 1) == SQUARE_SIDE - 1)
     {
-      *encrypted_Index = *(square + (*indices * SQUARE_SIDE)); // left letter in this row
+      // left letter in this row
+      *encrypted_Index = *(square + (*indices * SQUARE_SIDE));
     }
     else
     {
-      *encrypted_Index = *(square + (*indices * SQUARE_SIDE) + *(indices + 1) + 1); // next to the right
+      // next to the right
+      *encrypted_Index = *(square + (*indices * SQUARE_SIDE) + *(indices + 1) + 1);
     }
 
     if (*(indices + 3) == SQUARE_SIDE - 1) // if second letter is on the right
     {
-      *(encrypted_Index + 1) = *(square + (*(indices + 2) * SQUARE_SIDE)); // left letter in this row
+      // left letter in this row
+      *(encrypted_Index + 1) = *(square + (*(indices + 2) * SQUARE_SIDE));
     }
     else
     {
-      *(encrypted_Index + 1) = *(square + (*(indices + 2) * SQUARE_SIDE) + *(indices + 3) + 1); // next to the right
+      // next to the right
+      *(encrypted_Index + 1) = *(square + (*(indices + 2) * SQUARE_SIDE) + *(indices + 3) + 1);
     }
     break;
 
-  case SAME_COLUMN: // bigram is in the same column
+  case SAME_COLUMN:                  // bigram is in the same column
     if (*indices == SQUARE_SIDE - 1) // if first letter is in the last row
     {
       *encrypted_Index = *(square + *(indices + 1)); // first row + column
     }
     else
     {
-      *encrypted_Index = *(square + (SQUARE_SIDE * (*(indices) + 1)) + *(indices + 1)); // next row + column
+      // next row + column
+      *encrypted_Index = *(square + (SQUARE_SIDE * (*(indices) + 1)) + *(indices + 1));
     }
 
     if (*(indices + 2) == SQUARE_SIDE - 1) // if second letter is in the last row
@@ -222,15 +229,17 @@ void encryptBigram(char *encrypted_Index, int *indices, char *square, PlayfairRu
     }
     else
     {
-      *(encrypted_Index + 1) = *(square + (SQUARE_SIDE * (*(indices + 2) + 1)) + *(indices + 3)); // next row + column
+      // next row + column
+      *(encrypted_Index + 1) = *(square + (SQUARE_SIDE * (*(indices + 2) + 1)) + *(indices + 3));
     }
     break;
 
   case DIFFERENT: // not in the same row or collum
-    *encrypted_Index = *(square + (SQUARE_SIDE * *(indices)) + *(indices + 3)); // first letter -> same row, second letter column
-    *(encrypted_Index + 1) = *(square + (SQUARE_SIDE * *(indices + 2)) + *(indices + 1)); // second letter -> same row, first letter column
+    // first letter -> same row, second letter column
+    *encrypted_Index = *(square + (SQUARE_SIDE * *(indices)) + *(indices + 3));
+    // second letter -> same row, first letter column
+    *(encrypted_Index + 1) = *(square + (SQUARE_SIDE * *(indices + 2)) + *(indices + 1));
     break;
-
   }
 }
 
@@ -247,49 +256,59 @@ void decryptBigram(char *decrypted_Index, int *indices, char *square, PlayfairRu
 {
   switch (type)
   {
-  case SAME_ROW: // bigram in the same row
+  case SAME_ROW:             // bigram in the same row
     if (*(indices + 1) == 0) // if first letter is on the left side
     {
-      *decrypted_Index = *(square + (*indices * SQUARE_SIDE) + (SQUARE_SIDE - 1)); // right side, same row
+      // right side, same row
+      *decrypted_Index = *(square + (*indices * SQUARE_SIDE) + (SQUARE_SIDE - 1));
     }
     else
     {
-      *decrypted_Index = *(square + (*indices * SQUARE_SIDE) + *(indices + 1) - 1); // one right, same row
+      // one right, same row
+      *decrypted_Index = *(square + (*indices * SQUARE_SIDE) + *(indices + 1) - 1);
     }
 
     if (*(indices + 3) == 0) // if second letter is on the left side
     {
-      *(decrypted_Index + 1) = *(square + (*(indices + 2) * SQUARE_SIDE) + (SQUARE_SIDE - 1)); // right side, same row
+      // right side, same row
+      *(decrypted_Index + 1) = *(square + (*(indices + 2) * SQUARE_SIDE) + (SQUARE_SIDE - 1));
     }
     else
     {
-      *(decrypted_Index + 1) = *(square + (*(indices + 2) * SQUARE_SIDE) + *(indices + 3) - 1); // one right, same row
+      // one right, same row
+      *(decrypted_Index + 1) = *(square + (*(indices + 2) * SQUARE_SIDE) + *(indices + 3) - 1);
     }
     break;
 
-  case SAME_COLUMN: // bigram in the same column
+  case SAME_COLUMN:    // bigram in the same column
     if (*indices == 0) // if first letter is in the first row
     {
-      *decrypted_Index = *(square + *(indices + 1) + ((SQUARE_SIDE - 1) * SQUARE_SIDE)); // last row, same column
+      // last row, same column
+      *decrypted_Index = *(square + *(indices + 1) + ((SQUARE_SIDE - 1) * SQUARE_SIDE));
     }
     else
     {
-      *decrypted_Index = *(square + (SQUARE_SIDE * (*(indices)-1)) + *(indices + 1)); // next row, same column
+      // next row, same column
+      *decrypted_Index = *(square + (SQUARE_SIDE * (*(indices)-1)) + *(indices + 1));
     }
 
     if (*(indices + 2) == 0) // if second letter is in the first row
     {
-      *(decrypted_Index + 1) = *(square + *(indices + 3) + ((SQUARE_SIDE - 1) * SQUARE_SIDE)); // last row, same column
+      // last row, same column
+      *(decrypted_Index + 1) = *(square + *(indices + 3) + ((SQUARE_SIDE - 1) * SQUARE_SIDE));
     }
     else
     {
-      *(decrypted_Index + 1) = *(square + (SQUARE_SIDE * (*(indices + 2) - 1)) + *(indices + 3)); // newxt row, same column
+      // newxt row, same column
+      *(decrypted_Index + 1) = *(square + (SQUARE_SIDE * (*(indices + 2) - 1)) + *(indices + 3));
     }
     break;
 
   case DIFFERENT: // not in the same row and column
-    *decrypted_Index = *(square + (SQUARE_SIDE * *(indices)) + *(indices + 3)); // same row, second letters column
-    *(decrypted_Index + 1) = *(square + (SQUARE_SIDE * *(indices + 2)) + *(indices + 1)); // same row, first letters column
+    // same row, second letters column
+    *decrypted_Index = *(square + (SQUARE_SIDE * *(indices)) + *(indices + 3));
+    // same row, first letters column
+    *(decrypted_Index + 1) = *(square + (SQUARE_SIDE * *(indices + 2)) + *(indices + 1));
     break;
   }
 }
@@ -311,7 +330,7 @@ void getIndices(char *index, char *square, int *indices)
   {
     if (*square_Index == *index)
     {
-      *indices = counter / SQUARE_SIDE; // first row
+      *indices = counter / SQUARE_SIDE;       // first row
       *(indices + 1) = counter % SQUARE_SIDE; // first column
     }
     else if (*square_Index == *(index + 1))
@@ -326,30 +345,36 @@ void getIndices(char *index, char *square, int *indices)
 
 //------------------------------------------------------------------------------
 /// Reads the plaintext from the users input. Afterwards creates the bigram
-/// from it. 
+/// from it.
 ///
-/// @param char *plaintext, user input to encrypt
 /// @param char *bigrams, array to save generated bigrams
 //
-void getBigrams(char *plaintext, char *bigrams)
+void getBigrams(char *bigrams)
 {
-  int bigrams_Size = 0;
+  char plaintext[MAX_PLAINTEXT_LENGTH + 1] = {'\0'};
+  int bigrams_size = 0;
+
   do
   {
     printf("%s", PLAINTEXT_MESSAGE);
     cleanArray(bigrams, MAX_PLAINTEXT_LENGTH); // for next time
+    cleanArray(plaintext, MAX_PLAINTEXT_LENGTH);
 
-    fgets(plaintext, MAX_PLAINTEXT_LENGTH, stdin);
-    cleanString(plaintext, IS_ENCRYPTING);
+    fgets(plaintext, MAX_PLAINTEXT_LENGTH + 1, stdin); // + 1 for \n
+    
+  } while (!checkStringValidity(plaintext, MAX_PLAINTEXT_LENGTH, IS_ENCRYPTING));
 
-    bigrams_Size = fillBigrams(plaintext, bigrams);
-  } while (!checkStringValidity(plaintext, MAX_PLAINTEXT_LENGTH, IS_ENCRYPTING) &&
-           bigrams_Size * 2 <= MAX_PLAINTEXT_LENGTH);
+  cleanString(plaintext, IS_ENCRYPTING);
+  bigrams_size = fillBigrams(plaintext, bigrams);
+  if (bigrams_size > 50) {
+    getBigrams(bigrams);
+  }
+
 }
 
 //------------------------------------------------------------------------------
 /// Iterates through the plaintext and coninuesly add bigrams
-/// to the given bigram array 
+/// to the given bigram array
 ///
 /// @param char *plaintext, user input to encrypt
 /// @param char *bigrams, array to save generated bigrams
@@ -360,7 +385,7 @@ int fillBigrams(char *plaintext, char *bigrams)
 {
   char *character = NULL;
   int bigrams_size = 0;
-  for (character = plaintext; *character != '\n'; character++)
+  for (character = plaintext; *character != '\0'; character++)
   {
     if ((bigrams_size % 2 == 1) && *(bigrams - 1) == *character)
     {
@@ -388,7 +413,7 @@ int fillBigrams(char *plaintext, char *bigrams)
 
 ///-----------------------------------------------------------------------------
 /// Reads the ciphertext from the users input, cleans and checks it
-/// 
+///
 /// @param char *ciphertext, array to save users ciphertext
 //
 void getCiphertext(char *ciphertext)
@@ -397,15 +422,34 @@ void getCiphertext(char *ciphertext)
   {
     printf("%s", CIPHERTEXT_MESSAGE);
     cleanArray(ciphertext, MAX_CIPHERTEXT_LENGTH);
-    fgets(ciphertext, MAX_CIPHERTEXT_LENGTH, stdin);
-    cleanString(ciphertext, IS_DECRYPTING);
+    fgets(ciphertext, MAX_CIPHERTEXT_LENGTH + 1, stdin);
   } while (!checkStringValidity(ciphertext, MAX_CIPHERTEXT_LENGTH, IS_DECRYPTING));
+
+  char *index = NULL;
+  for (index = ciphertext; *index != '\0'; index += 2)
+  {
+    if (*index != FORBIDDEN_CHAR_DECRYPTING || *(index + 1) != FORBIDDEN_CHAR_DECRYPTING)
+    {
+      if (*index != *(index + 1))
+      {
+        cleanString(ciphertext, IS_DECRYPTING);
+      }
+      else
+      {
+        getCiphertext(ciphertext);
+      }
+    }
+    else
+    {
+      getCiphertext(ciphertext);
+    }
+  }
 }
 
 ///-----------------------------------------------------------------------------
 /// Iterates throught the ciphertext given and calculates the decrypted
 /// bigrams. Afterwards saves it to the decrypted array.
-/// 
+///
 /// @param char *decrypted, array to save decrypted bigrams
 /// @param char *ciphertext, given users input
 /// @param char *playfair square array for decryption
@@ -437,7 +481,6 @@ void fillDecrypted(char *decrypted, char *ciphertext, char *square)
   }
 }
 
-
 ///-----------------------------------------------------------------------------
 /// Asks the user what he wand to do. Either to encrypt a message, decrypt
 /// a ciphertext or to quit the program.
@@ -446,13 +489,23 @@ void fillDecrypted(char *decrypted, char *ciphertext, char *square)
 //
 int getOption()
 {
-  int option = 0;
+  int option;
+  int character;
   do
   {
     printf("\nWählen Sie bitte eine Option:\n%s\n", OPTIONS);
-    scanf("%i", &option);
-    getchar(); // clear enter
-  } while (option != ENCRYPT && option != DECRYPT && option != QUIT);
+    option = getchar();
+    if (option != '\n')
+    {
+        if ((character = getchar()) != '\n')
+      {
+        option = 0;
+        while ((character = getchar()) != '\n' && character != EOF);
+      }
+    }
+
+  } while (option != ENCRYPT_CHAR && option != DECRYPT_CHAR && option != QUIT_CHAR);
+
   return option;
 }
 
@@ -500,7 +553,7 @@ void toUpper(char *text)
 //
 void replaceLetters(char *text, char original, char new_char)
 {
-  char *index;
+  char *index = NULL;
   for (index = text; *index != '\0'; index++)
   {
     if (*index == original)
@@ -544,4 +597,3 @@ void printArray(char *array)
   }
   printf("\n");
 }
-
